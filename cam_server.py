@@ -4,6 +4,7 @@ import numpy as np
 import cv2
 import os
 from multiprocessing import Value
+import requests
 
 import torch
 import torch.nn as nn
@@ -11,6 +12,12 @@ import torch.optim as optim
 from torch.utils.data import DataLoader
 from torchvision import datasets, transforms
 from WeatherModel import WeatherModel
+
+dhtTemp = 0
+bmpTemp = 0
+humidity = 0
+windSpeed = 0
+pressure = 0
 
 app = Flask(__name__)
 # app.config['DEBUG'] = True
@@ -36,7 +43,7 @@ def index():
 	return "ESP32-CAM Flask Server", 200
 
 # temporarily stopped saving to demonstrate proof of model
-@app.route('/upload', methods=['POST','GET'])
+@app.route('/upload_image', methods=['POST','GET'])
 def upload():
 	received = request
 	img = None
@@ -65,13 +72,31 @@ def upload():
 		model.eval()
 		output = model(reshapedImg)
 		_, processed_output = torch.max(output, 1)
-		print(processed_output)
+		otherData = torch.tensor([dhtTemp, bmpTemp, humidity, windSpeed, pressure])
+		# model processing goes here ... TODO: make model
+		requests.post("esp32 ip here/raining", data=1)
 		#save_img(img)
 		
 		return "[SUCCESS] Image Received", 201
 	else:
 		return "[FAILED] Image Not Received", 204
+
+app.route('upload_data', methods = ['POST'])
+def upload_data():
+	windSpeedStr = request.args.get('windSpeed')
+	bmpTempStr = request.args.get('bmpTemp')
+	bmpPressureStr = request.args.get('bmpPressure')
+	dhtTempStr = request.args.get('dhtTemp')
+	dhtHumidityStr = request.args.get('dhtHumidity')
 	
+	windSpeed = float(windSpeedStr) if windSpeedStr else None
+	bmpTemp = float(bmpTempStr) if bmpTempStr else None
+	pressure = float(bmpPressureStr) if bmpPressureStr else None
+	dhtTemp = float(dhtTempStr) if dhtTempStr else None
+	humidity = float(dhtHumidityStr) if dhtHumidityStr else None
+
+	return "OK", 200
+
 def main():
     app.run(host = "0.0.0.0", port = '3237')
 
