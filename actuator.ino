@@ -31,7 +31,7 @@ void setup(void) {
     Serial.println("MDNS responder started");
   }
 
-  server.on("/raining", handleRaining);
+  server.on("/raining", HTTP_POST, handleRaining);
 
   server.onNotFound(handleNotFound);
 
@@ -52,4 +52,14 @@ void handleNotFound() {
     message += " " + server.argName(i) + ": " + server.arg(i) + "\n";
   }
   server.send(404, "text/plain", message);
+}
+
+void handleRaining() {
+  if (server.hasArg("plain")) {
+    String data = server.arg("plain"); // either 1 or 0
+    // handle data here
+    server.send(200, "text/plain", "Data received");
+  } else {
+    server.send(400, "text/plain", "No data received");
+  }
 }
