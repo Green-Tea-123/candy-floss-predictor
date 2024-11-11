@@ -74,8 +74,8 @@ def upload():
 		_, processed_output = torch.max(output, 1)
 		otherData = torch.tensor([dhtTemp, bmpTemp, humidity, windSpeed, pressure])
 		# model processing goes here ... TODO: make model
-		data = 1 # should be 1 or 0 based on the model output
-		requests.post("esp32 ip here/raining", data=data)
+		data = str(1) # should be 1 or 0 based on the model output
+		requests.post("http://192.168.58.121/raining", data=data)
 		#save_img(img)
 		
 		return "[SUCCESS] Image Received", 201

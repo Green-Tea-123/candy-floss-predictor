@@ -3,14 +3,15 @@
 #include <WebServer.h>
 #include <ESPmDNS.h>
 
-const char* ssid = "";
-const char* password = "";
+const char* ssid = "JB's phone";
+const char* password = "eeffoc8257";
 
 WebServer server(80);
 
+void handleRaining(); // Function prototype for handleRaining
+void handleNotFound();
+
 void setup(void) {
-  pinMode(led, OUTPUT);
-  digitalWrite(led, 0);
   Serial.begin(115200);
   WiFi.mode(WIFI_STA);
   WiFi.begin(ssid, password);
@@ -57,9 +58,20 @@ void handleNotFound() {
 void handleRaining() {
   if (server.hasArg("plain")) {
     String data = server.arg("plain"); // either 1 or 0
+    Serial.println(data);
+    if (data.equals("1")) {
+      Serial.println("is raining");
+    } else {
+      Serial.println("is not raining");
+    }
     // handle data here
     server.send(200, "text/plain", "Data received");
   } else {
     server.send(400, "text/plain", "No data received");
+    Serial.println("Data not received");
   }
+}
+
+void loop() {
+  server.handleClient(); // This allows the server to process incoming requests
 }
