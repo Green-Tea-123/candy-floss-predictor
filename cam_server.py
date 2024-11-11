@@ -12,6 +12,9 @@ import torch.optim as optim
 from torch.utils.data import DataLoader
 from torchvision import datasets, transforms
 from WeatherModel import WeatherModel
+import pandas as pd
+import pickle
+from sklearn.tree import DecisionTreeClassifier
 
 dhtTemp = 0
 bmpTemp = 0
@@ -73,8 +76,18 @@ def upload():
 		output = model(reshapedImg)
 		_, processed_output = torch.max(output, 1)
 		otherData = torch.tensor([dhtTemp, bmpTemp, humidity, windSpeed, pressure])
-		# model processing goes here ... TODO: make model
-		data = str(1) # should be 1 or 0 based on the model output
+
+		# process and combine data for input into decision tree
+		inputArray = torch.cat((processed_output, otherData), dim=0)
+		df_input = pd.DataFrame(inputArray.reshape((1, 6)))
+
+		# initialise decision tree
+		with open('decision_tree.pkl', 'rb') as file:
+			decisionTree = pickle.load(file)
+		
+		output = decisionTree.predict(df_input)
+		data = str(output[0]) # should be 1 or 0 based on the model output
+		print(data)
 		requests.post("http://192.168.58.121/raining", data=data)
 		#save_img(img)
 		
