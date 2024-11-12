@@ -85,8 +85,10 @@ void handleRaining() {
     Serial.println(data);
     if (data.equals("1")) {
       Serial.println("is raining");
+      closeWindow();
     } else {
       Serial.println("is not raining");
+      openWindow();
     }
     // handle data here
     server.send(200, "text/plain", "Data received");
