@@ -75,7 +75,7 @@ def upload():
 		model.eval()
 		output = model(reshapedImg)
 		_, processed_output = torch.max(output, 1)
-		otherData = torch.tensor([dhtTemp, bmpTemp, humidity, windSpeed, pressure])
+		otherData = torch.tensor([windSpeed, bmpTemp, pressure, dhtTemp, humidity])
 
 		# process and combine data for input into decision tree
 		inputArray = torch.cat((processed_output, otherData), dim=0)

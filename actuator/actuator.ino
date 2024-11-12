@@ -2,17 +2,41 @@
 #include <WiFiClient.h>
 #include <WebServer.h>
 #include <ESPmDNS.h>
+#include <ESP32Servo.h>
 
-const char* ssid = "JB's phone";
-const char* password = "eeffoc8257";
+Servo clothesServo;
+Servo windowServo;
+
+int clothesPos = 0;
+int clothesServoPin = 17;
+int windowPos = 60;
+int windowServoPin = 15;
+int windowOpen = true;
+
+const char* ssid = "JB's Laptop";
+const char* password = "12345678";
 
 WebServer server(80);
 
 void handleRaining(); // Function prototype for handleRaining
 void handleNotFound();
+void closeWindow();
+void openWindow();
 
 void setup(void) {
   Serial.begin(115200);
+  // servo code
+  ESP32PWM::allocateTimer(0);
+	ESP32PWM::allocateTimer(1);
+	ESP32PWM::allocateTimer(2);
+	ESP32PWM::allocateTimer(3);
+	clothesServo.setPeriodHertz(50);
+  clothesServo.write(clothesPos);
+	clothesServo.attach(clothesServoPin, 500, 2500);
+  windowServo.setPeriodHertz(50);
+  windowServo.write(windowPos);
+  windowServo.attach(windowServoPin, 500, 2500);
+  // wifi code
   WiFi.mode(WIFI_STA);
   WiFi.begin(ssid, password);
   Serial.println("");
@@ -74,4 +98,40 @@ void handleRaining() {
 
 void loop() {
   server.handleClient(); // This allows the server to process incoming requests
+}
+
+void closeWindow() {
+  if (windowOpen) {
+    // move clothesline in first
+    for (; clothesPos <= 240; clothesPos += 1) {
+      clothesServo.write(clothesPos);
+      delay(2);
+    }
+    delay(500);
+    
+    // close window
+    for (; windowPos <= 110; windowPos += 1) {
+      windowServo.write(windowPos);
+      delay(10);
+    }
+    windowOpen = false;
+  }
+}
+
+void openWindow() {
+  if (!windowOpen) { 
+    // open window first
+    for (; windowPos >= 40; windowPos -= 1) {
+      windowServo.write(windowPos);
+      delay(10);
+    }
+    delay(500);
+
+    // move clothesline out
+    for (; clothesPos >= 0; clothesPos -= 1) {
+      clothesServo.write(clothesPos);
+      delay(2);
+    }
+    windowOpen = true;
+  }
 }
