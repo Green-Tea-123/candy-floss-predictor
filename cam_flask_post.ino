@@ -15,17 +15,16 @@
 #include "soc/rtc_cntl_reg.h"
 #include "esp_camera.h"
 
-const char* ssid = "Joshua's iPhone";
-const char* password = "buymyselfflowers";
+const char* ssid = "[REDACTED]";
+const char* password = "[REDACTED]";
 
-String serverName = "192.168.14.145";   
-//String serverName = "example.com";   
+String serverName = "[SERVER_IP_ADDRESS]";   
 
-String serverPath = "/upload";  // Flask upload route
+String serverPath = "/upload_image";  // Flask upload route
 
 const int serverPort = 3237;
 
-const int timerInterval = 20 * 1000;    // time (milliseconds) between each HTTP POST image
+const int timerInterval = 60 * 1000;    // time (milliseconds) between each HTTP POST image
 unsigned long previousMillis = 0;   // last time image was sent
 
 WiFiClient client;
@@ -107,6 +106,12 @@ void setup() {
     delay(1000);
     ESP.restart();
   }
+
+  // configure camera
+  sensor_t *s = esp_camera_sensor_get();
+  s->set_gain_ctrl(s, 1);
+  s->set_exposure_ctrl(s, 1);
+  s->set_awb_gain(s, 1);
 
   sendPhoto(); 
 }

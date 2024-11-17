@@ -13,8 +13,8 @@ int windowPos = 60;
 int windowServoPin = 15;
 int windowOpen = true;
 
-const char* ssid = "JB's Laptop";
-const char* password = "12345678";
+const char* ssid = "[REDACTED]";
+const char* password = "[REDACTED]";
 
 WebServer server(80);
 

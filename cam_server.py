@@ -23,9 +23,6 @@ windSpeed = 0
 pressure = 0
 
 app = Flask(__name__)
-# app.config['DEBUG'] = True
-# app.secret_key = 'sdfhj43uop23opjuhjg234jghds8'
-# app.jinja_env.globals.update(zip=zip)
 
 # declare counter variable
 counter = Value('i', 0)
@@ -88,14 +85,14 @@ def upload():
 		output = decisionTree.predict(df_input)
 		data = str(output[0]) # should be 1 or 0 based on the model output
 		print(data)
-		requests.post("http://192.168.58.121/raining", data=data)
-		#save_img(img)
+		requests.post("http://[ACTUATOR_IP_ADDRESS]/raining", data=data)
 		
 		return "[SUCCESS] Image Received", 201
 	else:
 		return "[FAILED] Image Not Received", 204
 
-app.route('upload_data', methods = ['POST'])
+# for upload of the data
+@app.route('upload_data', methods = ['GET', 'POST'])
 def upload_data():
 	windSpeedStr = request.args.get('windSpeed')
 	bmpTempStr = request.args.get('bmpTemp')

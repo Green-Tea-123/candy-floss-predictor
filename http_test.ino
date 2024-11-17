@@ -2,8 +2,8 @@
 #include <HTTPClient.h>
 
 // Replace with your network credentials
-const char* ssid = "ESPtest";
-const char* password = "244466666";
+const char* ssid = "[REDACTED]";
+const char* password = "[REDACTED]";
 
 void setup() {
     Serial.begin(115200);

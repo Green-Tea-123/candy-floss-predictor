@@ -7,15 +7,11 @@
 #include <WiFiMulti.h>
 #include <HTTPClient.h>
 #include <stdio.h>
-#include <ESP32Servo.h>
-#define POT_PIN 15
-#define SERVO_PIN 18
-
 WiFiMulti wifiMulti;
 
 // Server variables
-const char* ssid = "********"; //Your Wifi's SSID
-const char* password = "********"; //Wifi Password
+const char* ssid = "[REDACTED]";
+const char* password = "[REDACTED]";
 
 const char* laptopAt = "http://[SERVER_IP_ADDRESS]:3237"; //change to your Laptop's IP
 
@@ -24,13 +20,13 @@ Adafruit_BMP085 bmp;
 
 // for anemometer
 unsigned long lastDebounceTime = 0;  // the last time the output pin was toggled
-unsigned long debounceDelay = 1000;    // the debounce time; increase if the output flickers
-int pinInterrupt = 4;
+unsigned long debounceDelay = 1000 * 10;    // the debounce time; increase if the output flickers
+int pinInterrupt = 13;
 int count = 0;
 
 // for DHT22
-#define DHTPIN 2     // Digital pin connected to the DHT sensor 
-#define DHTTYPE    DHT11     // DHT 11
+#define DHTPIN 5     // Digital pin connected to the DHT sensor 
+#define DHTTYPE DHT11     // DHT 11
 DHT_Unified dht(DHTPIN, DHTTYPE);
 
 char* url;
@@ -39,10 +35,6 @@ float bmpTemp;
 int bmpPressure;
 float dhtTemp;
 float dhtHumidity;
-
-// for servo
-Servo myServo;
-int pos;
  
 void onChange()
 {
@@ -53,13 +45,6 @@ void onChange()
  
 void setup()
 {
-  ESP32PWM::allocateTimer(0);
-	ESP32PWM::allocateTimer(1);
-	ESP32PWM::allocateTimer(2);
-	ESP32PWM::allocateTimer(3);
-	myServo.setPeriodHertz(50);    // standard 50 hz servo
-	myServo.attach(SERVO_PIN, 500, 2500); // attaches the servo on pin 18 to the servo object
-
   Serial.begin(115200); //Initialize serial port
   pinMode(pinInterrupt, INPUT_PULLUP);// set the interrupt pin
  
@@ -107,9 +92,7 @@ void setup()
  
 void loop()
 {
-  pos = analogRead(POT_PIN) * 180 / 4096;
-  myServo.write(pos);
-  
+
   // all tasks performed once per period depending on debounce delay
   if ((millis() - lastDebounceTime) > debounceDelay && WiFi.status() == WL_CONNECTED)
   {
@@ -118,7 +101,7 @@ void loop()
     HTTPClient http;
 
     // wind speed readings
-    windSpeed = (count * 8.75) / 100;
+    windSpeed = (count * 8.75) / 100 / 60;
     Serial.print("Wind Speed: ");
     Serial.print(windSpeed);
     Serial.println("m/s");
@@ -159,8 +142,8 @@ void loop()
     }
 
     // send readings to server
-    url = (char*) malloc(128);
-    snprintf(url, 128, "%s/data?windSpeed=%.2f&bmpTemp=%.2f&bmpPressure=%d&dhtTemp=%.2f&dhtHumidity=%.2f",
+    url = (char*) malloc(140);
+    snprintf(url, 140, "%s/data?windSpeed=%.2f&bmpTemp=%.2f&bmpPressure=%d&dhtTemp=%.2f&dhtHumidity=%.2f",
       laptopAt, windSpeed, bmpTemp, bmpPressure, dhtTemp, dhtHumidity);
     http.begin(url);
     Serial.println(url);
