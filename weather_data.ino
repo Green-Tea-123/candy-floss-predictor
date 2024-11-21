@@ -9,10 +9,10 @@
 #include "driver/rtc_io.h"
 
 // Server variables
-const char* ssid = "Joshua's iPhone";
-const char* password = "buymyselfflowers";
+const char* ssid = "[REDACTED]";
+const char* password = "[REDACTED]";
 
-const char* laptopAt = "http://192.168.14.145:3237";  //change to your Laptop's IP
+const char* laptopAt = "http://[REDACTED]";  //change to your Laptop's IP
 
 const int period = 60;
 
@@ -140,10 +140,16 @@ void send_data() {
     Serial.println(F("%"));
   }
 
+  // create get request string
+  url = (char*)malloc(132);
+  snprintf(url, 132, "%s/data?windSpeed=%.2f&bmpTemp=%.2f&bmpPressure=%d&dhtTemp=%.2f&dhtHumidity=%.2f",
+           laptopAt, windSpeed, bmpTemp, bmpPressure, dhtTemp, dhtHumidity);
+
   // connect to WiFi
+  unsigned long timer = millis();
   WiFi.begin(ssid, password);
   while (WiFi.status() != WL_CONNECTED) {
-    delay(500);
+    delay(200);
     Serial.print(".");
   }
   Serial.println("");
@@ -155,13 +161,9 @@ void send_data() {
   HTTPClient http;
 
   // send readings to server
-  url = (char*)malloc(132);
-  snprintf(url, 132, "%s/data?windSpeed=%.2f&bmpTemp=%.2f&bmpPressure=%d&dhtTemp=%.2f&dhtHumidity=%.2f",
-           laptopAt, windSpeed, bmpTemp, bmpPressure, dhtTemp, dhtHumidity);
   http.begin(url);
   Serial.println(url);
   int returnCode = http.GET();  //perform a HTTP GET request
-
   Serial.println(returnCode);
 
   if (returnCode > 0) {
@@ -169,7 +171,7 @@ void send_data() {
     Serial.println(payload);
   }
   http.end();
-  free(url);
   WiFi.disconnect();
-  Serial.println();
+  Serial.println(millis() - timer);
+  free(url);
 }
